@@ -1,9 +1,9 @@
-// src/app/quiz/page.tsx
 "use client";
 
 import { useQuizContext } from "@/context/QuizContext";
 import { FaCheckCircle } from "react-icons/fa";
-import { useRouter } from "next/navigation"; // Import the useRouter hook
+import { useRouter } from "next/navigation";
+import ProgressBar from "@/components/ProgressBar";
 
 export default function QuizPage() {
   const {
@@ -14,11 +14,11 @@ export default function QuizPage() {
     feedback,
     explanation,
     correctAnswers,
+    timeLeft,
+    selectedAnswer,
   } = useQuizContext();
 
-  const router = useRouter(); // Initialize the router
-
-  const currentQuestion = questions[currentQuestionIndex];
+  const router = useRouter();
 
   if (isQuizFinished) {
     return (
@@ -39,18 +39,12 @@ export default function QuizPage() {
             </div>
           </div>
 
-          <div className="mt-4">
-            <p className="text-lg font-medium text-gray-700">
-              Well done! Keep up the good work and keep learning.
-            </p>
-            <p className="mt-2 text-sm text-gray-500">
-              You've completed the quiz. If you want to try again or share your results, feel free to go ahead!
-            </p>
-          </div>
+          <p className="text-lg font-medium text-gray-700 mt-4">
+            Well done! Keep up the good work and keep learning.
+          </p>
 
-          {/* Try Again Button with Navigation */}
           <button
-            onClick={() => router.push("/")} // Redirect to the home or start quiz page
+            onClick={() => router.push("/")}
             className="mt-6 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition duration-300 hover:from-cyan-600 hover:to-blue-600"
           >
             Try Again
@@ -60,23 +54,57 @@ export default function QuizPage() {
     );
   }
 
+  const currentQuestion = questions[currentQuestionIndex];
+  const correctIndex = currentQuestion.answer;
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-6">
       <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md space-y-4">
         <h2 className="text-2xl font-semibold text-gray-800">
-          {currentQuestion.question}
+          <ProgressBar />
+          <div className="flex justify-between items-center text-sm mt-2">
+            <p className="text-gray-500">
+              Question {currentQuestionIndex + 1} of {questions.length}
+            </p>
+            <p
+              className={`font-semibold ${
+                timeLeft <= 10 ? "text-red-600" : "text-green-600"
+              }`}
+            >
+              ⏳ {timeLeft}s left
+            </p>
+          </div>
         </h2>
 
+        <h3 className="text-xl font-semibold text-gray-800">
+          {currentQuestion.question}
+        </h3>
+
         <div className="space-y-2">
-          {currentQuestion.options.map((option, index) => (
-            <button
-              key={index}
-              className="w-full p-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition duration-300"
-              onClick={() => submitAnswer(index)}
-            >
-              {option}
-            </button>
-          ))}
+          {currentQuestion.options.map((option, index) => {
+            let bgColor = "bg-indigo-600 hover:bg-indigo-700";
+
+            if (selectedAnswer !== null) {
+              if (index === correctIndex) {
+                bgColor = "bg-green-500 text-white";
+              } else if (index === selectedAnswer) {
+                bgColor = "bg-red-500 text-white";
+              } else {
+                bgColor = "bg-gray-300 text-gray-600";
+              }
+            }
+
+            return (
+              <button
+                key={index}
+                className={`w-full p-3 rounded-md transition duration-300 font-medium ${bgColor}`}
+                onClick={() => submitAnswer(index)}
+                disabled={selectedAnswer !== null}
+              >
+                {option}
+              </button>
+            );
+          })}
         </div>
 
         {feedback && (
