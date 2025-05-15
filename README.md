@@ -75,5 +75,5 @@ MIT License — Free for personal and academic use.
 Feel free to contribute or adapt it for workshops and awareness campaigns.
 
 🙌 Credits
-Created by [Your Name]
+Created by Sangeetha
 Inspired by the goal to make cybersecurity education fun and accessible!
